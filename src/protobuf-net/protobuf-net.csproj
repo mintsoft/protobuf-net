@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>protobuf-net</AssemblyName>
-    <Title>protobuf-net</Title>
+    <Title>protobuf-net.Pool</Title>
     <Description>A fork of Marc Gravell's protobuf-net with a bufferpool that caches larger buffers, improving LOH fragmentation behaviour</Description>
     <TargetFrameworks>net40;netstandard1.3</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -22,6 +22,9 @@
     <Authors>Marc Gravell, Rob Emery</Authors>
     <Company>Marc Gravell, Rob Emery</Company>
     <PackageId>protobuf-net.Pool</PackageId>
+    <Product>protobuf-net.Pool (net40)</Product>
+    <PackageProjectUrl>https://github.com/mintsoft/protobuf-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mintsoft/protobuf-net</RepositoryUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'VS'">
     <TargetFrameworks>$(TargetFrameworks);net20;net35</TargetFrameworks>

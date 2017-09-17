@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>protobuf-net</AssemblyName>
-    <Title>protobuf-net</Title>
+    <Title>protobuf-net.Pool</Title>
     <Description>A fork of Marc Gravell's protobuf-net with a bufferpool that caches larger buffers, improving LOH fragmentation behaviour</Description>
     <TargetFrameworks>net40;netstandard1.3</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

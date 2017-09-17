@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>protobuf-net</AssemblyName>
     <Title>protobuf-net</Title>
-    <Description>Provides simple access to fast and efficient "Protocol Buffers" serialization from .NET applications</Description>
+    <Description>A fork of Marc Gravell's protobuf-net with a bufferpool that caches larger buffers, improving LOH fragmentation behaviour</Description>
     <TargetFrameworks>net40;netstandard1.3</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>EMIT_ASSEMBLY_INFO</DefineConstants>
@@ -16,6 +16,12 @@
     <PlatformXmlSerializer>true</PlatformXmlSerializer>
     <PlatformBinaryFormatter>true</PlatformBinaryFormatter>
     <Configurations>Debug;Release;VS</Configurations>
+    <AssemblyVersion>2.3.2.1</AssemblyVersion>
+    <FileVersion>2.3.2.1</FileVersion>
+    <Version>2.3.2.1</Version>
+    <Authors>Marc Gravell, Rob Emery</Authors>
+    <Company>Marc Gravell, Rob Emery</Company>
+    <PackageId>protobuf-net.Pool</PackageId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'VS'">
     <TargetFrameworks>$(TargetFrameworks);net20;net35</TargetFrameworks>

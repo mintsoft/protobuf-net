@@ -2,17 +2,36 @@
 
 namespace ProtoBuf
 {
+    /// <summary>
+    /// Configures and provides access to information about the protobuf BufferPool
+    /// </summary>
     public static class BufferPoolConfiguration
     {
+        /// <summary>
+        /// Number of byte[] instances in the pool
+        /// </summary>
         public static int PoolSize = 20;
+        /// <summary>
+        /// Starting size of byte[] in the pool; sizes will double until the arrays fit the content. A power of 2 is preferred
+        /// </summary>
         public static int InitialBufferSize = 1024;
+        /// <summary>
+        /// Outputs the current sizes of the buffers in the pool; -1 if the buffer is currently leased
+        /// </summary>
+        public static int[] CurrentBufferPoolSizes => BufferPool.GetBufferPoolSizes();
     }
 
     internal sealed class BufferPool
     {
-        private BufferPool() { }
+        private static int _bufferPoolSize;
+        private static int _initialBufferSize;
 
-        private static readonly CachedBuffer[] Pool = new CachedBuffer[BufferPoolConfiguration.PoolSize];
+        private BufferPool() {
+            _bufferPoolSize = BufferPoolConfiguration.PoolSize;
+            _initialBufferSize = BufferPoolConfiguration.InitialBufferSize;
+        }
+
+        private static readonly CachedBuffer[] Pool = new CachedBuffer[_bufferPoolSize];
 
         internal static void Flush()
         {
@@ -25,7 +44,7 @@ namespace ProtoBuf
 
         internal static byte[] GetBuffer()
         {
-            return GetBuffer(BufferPoolConfiguration.InitialBufferSize);
+            return GetBuffer(_initialBufferSize);
         }
 
         internal static byte[] GetBuffer(int minSize)
@@ -131,7 +150,7 @@ namespace ProtoBuf
 
         public static int[] GetBufferPoolSizes()
         {
-            var bufferSizes = new int[BufferPoolConfiguration.PoolSize];
+            var bufferSizes = new int[_bufferPoolSize];
             lock(Pool)
             {
                 for (var i = 0; i < Pool.Length; i++)

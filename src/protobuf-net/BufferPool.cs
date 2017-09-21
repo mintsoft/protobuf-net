@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Diagnostics.Tracing;
-
+#if !COREFX
+//using System.Diagnostics.Tracing;
+#endif
 namespace ProtoBuf
 {
     /// <summary>
@@ -20,35 +21,6 @@ namespace ProtoBuf
         /// Outputs the current sizes of the buffers in the pool; -1 if the buffer is currently leased
         /// </summary>
         public static int[] CurrentBufferPoolSizes => BufferPool.GetBufferPoolSizes();
-    }
-
-    internal sealed class BufferPoolEventSource : EventSource
-    {
-        internal static BufferPoolEventSource Log = new BufferPoolEventSource();
-        internal void GetBuffer(long minimumRequiredBufferLength)
-        {
-            WriteEvent(1, minimumRequiredBufferLength);
-        }
-        internal void AllocatedNewBuffer(long bufferLength)
-        {
-            WriteEvent(2, bufferLength);
-        }
-        internal void ReturnedCachedBuffer(long minimumRequiredBufferLength, long returnedBufferLength)
-        {
-            WriteEvent(3, minimumRequiredBufferLength, returnedBufferLength);
-        }
-        internal void ResizeAndFlushLeft(int oldBufferLength, int minimumRequiredBufferLength, int newBufferLength)
-        {
-            WriteEvent(4, oldBufferLength, minimumRequiredBufferLength, newBufferLength);
-        }
-        internal void ReleasedBufferToPool(int bufferLength)
-        {
-            WriteEvent(5, bufferLength);
-        }
-        internal void Flushed()
-        {
-            WriteEvent(6);
-        }
     }
 
     internal sealed class BufferPool
@@ -224,6 +196,53 @@ namespace ProtoBuf
             {
                 Size = buffer.Length;
                 _reference = new WeakReference(buffer);
+            }
+        }
+#if COREFX
+        internal class EventMonitoringSource
+        {
+            internal void WriteEvent(int id, object[] inputs = null) { }
+            internal void WriteEvent(int id, long inputs) { }
+            internal void WriteEvent(int id, long input1, long input2) { }
+            internal void WriteEvent(int id, long input1, long input2, long input3) { }
+        }
+#else
+        //[EventSource(Name = "ProtoBuf.BufferPool.EventMonitoringSource")]
+        internal class EventMonitoringSource //: EventSource
+        {
+            internal void WriteEvent(int id, object[] inputs = null) { }
+            internal void WriteEvent(int id, long inputs) { }
+            internal void WriteEvent(int id, long input1, long input2) { }
+            internal void WriteEvent(int id, long input1, long input2, long input3) { }
+        }
+#endif
+
+        internal sealed class BufferPoolEventSource : EventMonitoringSource
+        {
+            internal static BufferPoolEventSource Log = new BufferPoolEventSource();
+            internal void GetBuffer(long minimumRequiredBufferLength)
+            {
+                WriteEvent(1, minimumRequiredBufferLength);
+            }
+            internal void AllocatedNewBuffer(long bufferLength)
+            {
+                WriteEvent(2, bufferLength);
+            }
+            internal void ReturnedCachedBuffer(long minimumRequiredBufferLength, long returnedBufferLength)
+            {
+                WriteEvent(3, minimumRequiredBufferLength, returnedBufferLength);
+            }
+            internal void ResizeAndFlushLeft(int oldBufferLength, int minimumRequiredBufferLength, int newBufferLength)
+            {
+                WriteEvent(4, oldBufferLength, minimumRequiredBufferLength, newBufferLength);
+            }
+            internal void ReleasedBufferToPool(int bufferLength)
+            {
+                WriteEvent(5, bufferLength);
+            }
+            internal void Flushed()
+            {
+                WriteEvent(6);
             }
         }
     }

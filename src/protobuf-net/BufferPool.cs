@@ -1,6 +1,6 @@
 ﻿using System;
 #if !COREFX
-//using System.Diagnostics.Tracing;
+using System.Diagnostics.Tracing;
 #endif
 namespace ProtoBuf
 {
@@ -198,26 +198,9 @@ namespace ProtoBuf
                 _reference = new WeakReference(buffer);
             }
         }
-#if COREFX
-        internal class EventMonitoringSource
-        {
-            internal void WriteEvent(int id, object[] inputs = null) { }
-            internal void WriteEvent(int id, long inputs) { }
-            internal void WriteEvent(int id, long input1, long input2) { }
-            internal void WriteEvent(int id, long input1, long input2, long input3) { }
-        }
-#else
-        //[EventSource(Name = "ProtoBuf.BufferPool.EventMonitoringSource")]
-        internal class EventMonitoringSource //: EventSource
-        {
-            internal void WriteEvent(int id, object[] inputs = null) { }
-            internal void WriteEvent(int id, long inputs) { }
-            internal void WriteEvent(int id, long input1, long input2) { }
-            internal void WriteEvent(int id, long input1, long input2, long input3) { }
-        }
-#endif
-
-        internal sealed class BufferPoolEventSource : EventMonitoringSource
+#if !COREFX
+        [EventSource(Name = "ProtoBuf.BufferPool.EventMonitoringSource")]
+        internal sealed class BufferPoolEventSource : EventSource
         {
             internal static BufferPoolEventSource Log = new BufferPoolEventSource();
             internal void GetBuffer(long minimumRequiredBufferLength)
@@ -246,4 +229,16 @@ namespace ProtoBuf
             }
         }
     }
+#else
+    internal sealed class BufferPoolEventSource
+        {
+            internal static BufferPoolEventSource Log = new BufferPoolEventSource();
+            internal void GetBuffer(long minimumRequiredBufferLength) { }
+            internal void AllocatedNewBuffer(long bufferLength) { }
+            internal void ReturnedCachedBuffer(long minimumRequiredBufferLength, long returnedBufferLength) { }
+            internal void ResizeAndFlushLeft(int oldBufferLength, int minimumRequiredBufferLength, int newBufferLength) { }
+            internal void ReleasedBufferToPool(int bufferLength) { }
+            internal void Flushed() { }
+        }
+#endif
 }

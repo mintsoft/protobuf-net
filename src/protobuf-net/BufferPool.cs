@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Tracing;
 
 namespace ProtoBuf
 {
@@ -21,6 +22,35 @@ namespace ProtoBuf
         public static int[] CurrentBufferPoolSizes => BufferPool.GetBufferPoolSizes();
     }
 
+    internal sealed class BufferPoolEventSource : EventSource
+    {
+        internal static BufferPoolEventSource Log = new BufferPoolEventSource();
+        internal void GetBuffer(long minimumRequiredBufferLength)
+        {
+            WriteEvent(1, minimumRequiredBufferLength);
+        }
+        internal void AllocatedNewBuffer(long bufferLength)
+        {
+            WriteEvent(2, bufferLength);
+        }
+        internal void ReturnedCachedBuffer(long minimumRequiredBufferLength, long returnedBufferLength)
+        {
+            WriteEvent(3, minimumRequiredBufferLength, returnedBufferLength);
+        }
+        internal void ResizeAndFlushLeft(int oldBufferLength, int minimumRequiredBufferLength, int newBufferLength)
+        {
+            WriteEvent(4, oldBufferLength, minimumRequiredBufferLength, newBufferLength);
+        }
+        internal void ReleasedBufferToPool(int bufferLength)
+        {
+            WriteEvent(5, bufferLength);
+        }
+        internal void Flushed()
+        {
+            WriteEvent(6);
+        }
+    }
+
     internal sealed class BufferPool
     {
         private static int _bufferPoolSize;
@@ -40,6 +70,7 @@ namespace ProtoBuf
                 for (var i = 0; i < Pool.Length; i++)
                     Pool[i] = null;
             }
+            BufferPoolEventSource.Log.Flushed();
         }
 
         internal static byte[] GetBuffer()
@@ -49,16 +80,23 @@ namespace ProtoBuf
 
         internal static byte[] GetBuffer(int minSize)
         {
+            BufferPoolEventSource.Log.GetBuffer(minSize);
             byte[] cachedBuff = GetCachedBuffer(minSize);
-            return cachedBuff ?? new byte[minSize];
+            if(cachedBuff == null)
+            {
+                BufferPoolEventSource.Log.AllocatedNewBuffer(minSize);
+                return new byte[minSize];
+            }
+            return cachedBuff;
+
         }
 
         internal static byte[] GetCachedBuffer(int minSize)
         {
+            var bestIndex = -1;
+            byte[] bestMatch = null;
             lock (Pool)
             {
-                var bestIndex = -1;
-                byte[] bestMatch = null;
                 for (var i = 0; i < Pool.Length; i++)
                 {
                     var buffer = Pool[i];
@@ -87,9 +125,9 @@ namespace ProtoBuf
                 {
                     Pool[bestIndex] = null;
                 }
-
-                return bestMatch;
             }
+            BufferPoolEventSource.Log.ReturnedCachedBuffer(minSize, bestMatch.Length);
+            return bestMatch;
         }
 
         internal static void ResizeAndFlushLeft(ref byte[] buffer, int toFitAtLeastBytes, int copyFromIndex, int copyBytes)
@@ -100,14 +138,24 @@ namespace ProtoBuf
             Helpers.DebugAssert(copyBytes >= 0);
 
             var newLength = buffer.Length * 2;
-            if (newLength < toFitAtLeastBytes) newLength = toFitAtLeastBytes;
+            if (newLength < toFitAtLeastBytes)
+            {
+                newLength = toFitAtLeastBytes;
+            }
+
+            BufferPoolEventSource.Log.ResizeAndFlushLeft(buffer.Length, toFitAtLeastBytes, newLength);
 
             if (copyBytes == 0)
             {
                 ReleaseBufferToPool(ref buffer);
             }
 
-            var newBuffer = GetCachedBuffer(toFitAtLeastBytes) ?? new byte[newLength];
+            var newBuffer = GetCachedBuffer(toFitAtLeastBytes);
+            if(newBuffer == null)
+            {
+                newBuffer = new byte[newLength];
+                BufferPoolEventSource.Log.AllocatedNewBuffer(newLength);
+            }
 
             if (copyBytes > 0)
             {
@@ -122,6 +170,8 @@ namespace ProtoBuf
         {
             if (buffer == null)
                 return;
+
+            BufferPoolEventSource.Log.ReleasedBufferToPool(buffer.Length);
 
             lock (Pool)
             {

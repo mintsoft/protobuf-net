@@ -1,5 +1,5 @@
 ﻿using System;
-#if !COREFX
+#if NET40
 using System.Diagnostics.Tracing;
 #endif
 namespace ProtoBuf
@@ -198,7 +198,7 @@ namespace ProtoBuf
                 _reference = new WeakReference(buffer);
             }
         }
-#if !COREFX
+#if NET40
         [EventSource(Name = "ProtoBuf.BufferPool.EventMonitoringSource")]
         internal sealed class BufferPoolEventSource : EventSource
         {
@@ -228,7 +228,6 @@ namespace ProtoBuf
                 WriteEvent(6);
             }
         }
-    }
 #else
     internal sealed class BufferPoolEventSource
         {
@@ -241,4 +240,5 @@ namespace ProtoBuf
             internal void Flushed() { }
         }
 #endif
+    }
 }

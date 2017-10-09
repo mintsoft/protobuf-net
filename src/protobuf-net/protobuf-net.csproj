@@ -17,13 +17,13 @@
     <PlatformBinaryFormatter>true</PlatformBinaryFormatter>
     <Configurations>Debug;Release;VS</Configurations>
     <Authors>Marc Gravell, Rob Emery</Authors>
-    <Version>2.3.3.2</Version>
+    <Version>2.3.3.3</Version>
     <Company>Marc Gravell, Rob Emery</Company>
     <PackageLicenseUrl>https://github.com/mintsoft/protobuf-net/blob/master/Licence.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/mintsoft/protobuf-net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mintsoft/protobuf-net</RepositoryUrl>
-    <AssemblyVersion>2.3.3.2</AssemblyVersion>
-    <FileVersion>2.3.3.2</FileVersion>
+    <AssemblyVersion>2.3.3.3</AssemblyVersion>
+    <FileVersion>2.3.3.3</FileVersion>
     <PackageId>protobuf-net.Pool</PackageId>
     <PackageReleaseNotes>https://mgravell.github.io/protobuf-net/releasenotes#2.3.3
 </PackageReleaseNotes>

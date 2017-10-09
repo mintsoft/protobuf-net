@@ -23,15 +23,9 @@ namespace ProtoBuf
 
     internal sealed class BufferPool
     {
-        private static int _bufferPoolSize;
-        private static int _initialBufferSize;
+        private BufferPool() { }
 
-        private BufferPool() {
-            _bufferPoolSize = BufferPoolConfiguration.PoolSize;
-            _initialBufferSize = BufferPoolConfiguration.InitialBufferSize;
-        }
-
-        private static readonly CachedBuffer[] Pool = new CachedBuffer[_bufferPoolSize];
+        private static readonly CachedBuffer[] Pool = new CachedBuffer[BufferPoolConfiguration.PoolSize];
 
         internal static void Flush()
         {
@@ -44,7 +38,7 @@ namespace ProtoBuf
 
         internal static byte[] GetBuffer()
         {
-            return GetBuffer(_initialBufferSize);
+            return GetBuffer(BufferPoolConfiguration.InitialBufferSize);
         }
 
         internal static byte[] GetBuffer(int minSize)
@@ -150,7 +144,7 @@ namespace ProtoBuf
 
         public static int[] GetBufferPoolSizes()
         {
-            var bufferSizes = new int[_bufferPoolSize];
+            var bufferSizes = new int[BufferPoolConfiguration.PoolSize];
             lock(Pool)
             {
                 for (var i = 0; i < Pool.Length; i++)

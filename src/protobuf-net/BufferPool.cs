@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Threading;
 
 namespace ProtoBuf
 {
@@ -26,6 +27,11 @@ namespace ProtoBuf
         private BufferPool() { }
 
         private static readonly CachedBuffer[] Pool = new CachedBuffer[BufferPoolConfiguration.PoolSize];
+
+        /// <remarks>
+        /// https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/gcallowverylargeobjects-element
+        /// </remarks>
+        private const int MaxByteArraySize = int.MaxValue - 56;
 
         internal static void Flush()
         {
@@ -93,7 +99,13 @@ namespace ProtoBuf
             Helpers.DebugAssert(copyFromIndex >= 0);
             Helpers.DebugAssert(copyBytes >= 0);
 
-            var newLength = buffer.Length * 2;
+            // try doubling, else match
+            int newLength = buffer.Length * 2;
+            if (newLength < 0)
+            {
+                newLength = MaxByteArraySize;
+            }
+
             if (newLength < toFitAtLeastBytes) newLength = toFitAtLeastBytes;
 
             if (copyBytes == 0)
